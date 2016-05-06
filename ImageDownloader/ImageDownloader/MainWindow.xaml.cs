@@ -5,7 +5,9 @@ using netoaster;
 using RestSharp;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Controls;
 
 namespace ImageDownloader
@@ -19,13 +21,8 @@ namespace ImageDownloader
 
         public MainWindow()
         {
-
-
             InitializeComponent();
-
-
             MyList = new ObservableCollection<DownloadResult>();
-            MyList.Add(new DownloadResult() { Status = "Ok", Url = "http://www.vg.no" });
             InfoDataGrid.ItemsSource = MyList;
         }
 
@@ -74,6 +71,14 @@ namespace ImageDownloader
 
                 foreach (var imgSrc in imgSrcList)
                 {
+                    var name = Path.GetFileName(imgSrc);
+                    var localFilename = string.Format("{0}\\{1}", TxtDestination.Text, name);
+
+                    using (var webClient = new WebClient())
+                    {
+                        webClient.DownloadFile(imgSrc, localFilename);
+                    }
+
                     var downloadResult = new DownloadResult() { Status = "Ok", Url = imgSrc };
                     MyList.Add(downloadResult);
                 }
