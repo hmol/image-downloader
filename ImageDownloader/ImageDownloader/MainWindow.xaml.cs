@@ -1,7 +1,12 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
-using System;
-using System.Windows.Controls;
+﻿using HtmlAgilityPack;
+using ImageDownloader.Models;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using netoaster;
+using RestSharp;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows.Controls;
 
 namespace ImageDownloader
 {
@@ -10,9 +15,18 @@ namespace ImageDownloader
     /// </summary>
     public partial class MainWindow
     {
+        public ObservableCollection<DownloadResult> MyList { get; set; }
+
         public MainWindow()
         {
+
+
             InitializeComponent();
+
+
+            MyList = new ObservableCollection<DownloadResult>();
+            MyList.Add(new DownloadResult() { Status = "Ok", Url = "http://www.vg.no" });
+            InfoDataGrid.ItemsSource = MyList;
         }
 
         //Get full path to selected folder, and display it in the destination textbox
@@ -30,21 +44,41 @@ namespace ImageDownloader
             }
         }
 
-        private void ValidateUrl()
+        private bool ValidateUrl()
         {
             try
             {
                 var url = new Uri(TxtSourceUrl.Text);
+                return true;
             }
             catch (UriFormatException)
             {
                 ErrorToaster.Toast("Url malformed", ToasterPosition.ApplicationTopRight);
             }
+            return false;
         }
 
         private void Download_BtnClick(object sender, System.Windows.RoutedEventArgs e)
         {
-            ValidateUrl();
+            var isValid = ValidateUrl();
+            if (isValid)
+            {
+                var client = new RestClient(TxtSourceUrl.Text);
+                var request = new RestRequest();
+                var result = client.Execute(request);
+
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(result.Content);
+                var nodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
+                var imgSrcList = nodes.Select(x => x.GetAttributeValue("src", string.Empty).TrimEnd('/')).ToList();
+
+                foreach (var imgSrc in imgSrcList)
+                {
+                    var downloadResult = new DownloadResult() { Status = "Ok", Url = imgSrc };
+                    MyList.Add(downloadResult);
+                }
+
+            }
         }
     }
 }
