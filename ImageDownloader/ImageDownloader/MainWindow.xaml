@@ -12,8 +12,8 @@
                       WindowStartupLocation="CenterScreen">
     
     <StackPanel Orientation="Vertical">
-        <TextBox Controls:TextBoxHelper.Watermark="Select destination folder" Controls:TextBoxHelper.IsWaitingForData="True" Margin="5" HorizontalAlignment="Left" Width="300" />
-        <TextBox Controls:TextBoxHelper.Watermark="Enter url" Controls:TextBoxHelper.IsWaitingForData="True" Margin="5" HorizontalAlignment="Left" Width="300" />
-        <Button Style="{StaticResource AccentedSquareButtonStyle}" Width="80" HorizontalAlignment="Left" Margin="5" Content="Download"></Button>
+        <TextBox Controls:TextBoxHelper.Watermark="Select destination folder" Controls:TextBoxHelper.IsWaitingForData="True" Margin="5" HorizontalAlignment="Left" Width="300" PreviewMouseDown="OpenFolderDialogue" />
+        <TextBox Controls:TextBoxHelper.Watermark="Enter url" Controls:TextBoxHelper.IsWaitingForData="True" Margin="5" HorizontalAlignment="Left" Width="300" Controls:TextBoxHelper.ClearTextButton="True"/>
+        <Button Style="{StaticResource AccentedSquareButtonStyle}" Width="80" HorizontalAlignment="Left" Margin="5" Content="Download" />
     </StackPanel>
 </Controls:MetroWindow>
