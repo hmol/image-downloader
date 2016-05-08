@@ -1,20 +1,52 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Reactive.Linq;
 using ImageDownloader.ViewModels;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using ReactiveUI;
+using System.Windows.Controls;
 
 namespace ImageDownloader
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow
+    public partial class MainWindow : IViewFor<AppViewModel>
     {
         public AppViewModel ViewModel { get; private set; }
+
+        AppViewModel IViewFor<AppViewModel>.ViewModel
+        {
+            get
+            {
+                return ViewModel;
+            }
+
+            set
+            {
+                //throw new NotImplementedException();
+            }
+        }
+
+        object IViewFor.ViewModel
+        {
+            get
+            {
+                return ViewModel;
+            }
+
+            set
+            {
+                //throw new NotImplementedException();
+            }
+        }
 
         public MainWindow()
         {
             ViewModel = new AppViewModel();
+
             InitializeComponent();
+            WindowGrid.DataContext = ViewModel;
+            this.Bind(ViewModel, x => x.DestinationPath, x => x.TxtDestination.Text);
         }
 
         private void DestinationTextBox_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -27,7 +59,7 @@ namespace ImageDownloader
 
             if (result == CommonFileDialogResult.Ok)
             {
-                textBox.Text = dialog.FileName;
+                TxtDestination.Text = dialog.FileName;
             }
         }
     }

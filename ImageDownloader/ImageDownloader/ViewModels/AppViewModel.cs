@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -24,6 +25,9 @@ namespace ImageDownloader.ViewModels
         // in the background.
 
         public ReactiveCommand<List<DownloadResult>> ExecuteDownload { get; protected set; }
+
+
+        public ReactiveCommand<string> StartAsyncCommand { get; protected set; }
 
         /* ObservableAsPropertyHelper
          * 
@@ -48,81 +52,39 @@ namespace ImageDownloader.ViewModels
 
         ObservableAsPropertyHelper<Visibility> _SpinnerVisibility;
         public Visibility SpinnerVisibility => _SpinnerVisibility.Value;
-        public ReactiveCommand<object> DownloadCommand { get; private set; }
+
         public AppViewModel()
         {
-
-            var canClickMeObservable = this.WhenAny(vm => vm.SourceUrl,
-                                s => !string.IsNullOrWhiteSpace(s.Value));
             ExecuteDownload = ReactiveCommand.CreateAsyncTask(parameter => GetDownloadResults(this.SourceUrl, this.DestinationPath));
 
-            DownloadCommand = new ReactiveCommand<object>(canClickMeObservable, null, null);
-            DownloadCommand.Subscribe(param => MessageBox.Show("I was clicked"));
+            StartAsyncCommand = ReactiveCommand.CreateAsyncTask<string>(_ =>
+            {
+                return Task.Run(() =>
+                {
+                    int Progress = 0;
+                    while (Progress <= 100)
+                    {
+                        Progress += 10;
+                        Thread.Sleep(100);
+                    }
 
-            /* Creating our UI declaratively
-             * 
-             * The Properties in this ViewModel are related to each other in different 
-             * ways - with other frameworks, it is difficult to describe each relation
-             * succinctly; the code to implement "The UI spinner spins while the search 
-             * is live" usually ends up spread out over several event handlers.
-             *
-             * However, with RxUI, we can describe how properties are related in a very 
-             * organized clear way. Let's describe the workflow of what the user does in
-             * this application, in the order they do it.
-             */
+                    return "sdf";
+                });
+            });
 
-            // We're going to take a Property and turn it into an Observable here - this
-            // Observable will yield a value every time the Search term changes (which in
-            // the XAML, is connected to the TextBox). 
-            //
-            // We're going to use the Throttle operator to ignore changes that 
-            // happen too quickly, since we don't want to issue a search for each 
-            // key pressed! We then pull the Value of the change, then filter 
-            // out changes that are identical, as well as strings that are empty.
-            //
-            // Finally, we use RxUI's InvokeCommand operator, which takes the String 
-            // and calls the Execute method on the ExecuteSearch Command, after 
-            // making sure the Command can be executed via calling CanExecute.
-            /*
-            this.WhenAnyValue(x => x.SearchTerm)
-                .Throttle(TimeSpan.FromMilliseconds(800), RxApp.MainThreadScheduler)
-                .Select(x => x?.Trim())
-                .DistinctUntilChanged()
-                .Where(x => !String.IsNullOrWhiteSpace(x))
-                .InvokeCommand(ExecuteSearch);
-                */
-            // How would we describe when to show the spinner in English? We 
-            // might say something like, "The spinner's visibility is whether
-            // the search is running". RxUI lets us write these kinds of 
-            // statements in code.
-            //
-            // ExecuteSearch has an IObservable<bool> called IsExecuting that
-            // fires every time the command changes execution state. We Select() that into
-            // a Visibility then we will use RxUI's
-            // ToProperty operator, which is a helper to create an 
-            // ObservableAsPropertyHelper object.
 
             _SpinnerVisibility = ExecuteDownload.IsExecuting
                 .Select(x => x ? Visibility.Visible : Visibility.Collapsed)
                 .ToProperty(this, x => x.SpinnerVisibility, Visibility.Hidden);
 
-            // We subscribe to the "ThrownExceptions" property of our ReactiveCommand,
-            // where ReactiveUI pipes any exceptions that are thrown in 
-            // "GetSearchResultsFromFlickr" into. See the "Error Handling" section
-            // for more information about this.
             ExecuteDownload.ThrownExceptions.Subscribe(ex => {/* Handle errors here */});
 
-            // Here, we're going to actually describe what happens when the Command
-            // gets invoked - we're going to run the GetSearchResultsFromFlickr every
-            // time the Command is executed. 
-            //
-            // The important bit here is the return value - an Observable. We're going
-            // to end up here with a Stream of FlickrPhoto Lists: every time someone 
-            // calls Execute, we eventually end up with a new list which we then 
-            // immediately put into the SearchResults property, that will then 
-            // automatically fire INotifyPropertyChanged.
+
+
             _DownloadResults = ExecuteDownload.ToProperty(this, x => x.DownloadResults, new List<DownloadResult>());
         }
+
+
 
         public static async Task<List<DownloadResult>> GetDownloadResults(string sourceUrl, string destinationPath)
         {
