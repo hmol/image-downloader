@@ -1,2 +1,1 @@
-# image-downloader
-Windows program to download images from url
+# Be aware, this is only a prototype at the moment! Code smells will appear frequently :neckbeard:

@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Windows.Controls;
 
 namespace ImageDownloader
@@ -72,7 +73,10 @@ namespace ImageDownloader
                 foreach (var imgSrc in imgSrcList)
                 {
                     var name = Path.GetFileName(imgSrc);
-                    var localFilename = string.Format("{0}\\{1}", TxtDestination.Text, name);
+                    var rgx = new Regex("[^a-zA-Z0-9 - .]");
+                    var newName = rgx.Replace(name, "_");
+
+                    var localFilename = string.Format("{0}\\{1}", TxtDestination.Text, newName);
 
                     using (var webClient = new WebClient())
                     {
