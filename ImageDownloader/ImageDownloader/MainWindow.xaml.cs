@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reactive.Linq;
-using ImageDownloader.ViewModels;
+﻿using ImageDownloader.ViewModels;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ReactiveUI;
 using System.Windows.Controls;

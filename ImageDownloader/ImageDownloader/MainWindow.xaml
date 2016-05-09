@@ -17,7 +17,7 @@
             <Button Style="{StaticResource AccentedSquareButtonStyle}" Width="80" HorizontalAlignment="Left" Margin="5" Content="Download" Command="{Binding ExecuteDownload}"/>
             <Controls:MetroProgressBar IsIndeterminate="True" Visibility="{Binding SpinnerVisibility}" HorizontalAlignment="Center" Width="572" Height="4" Margin="10,0" />
         </StackPanel>
-        <DataGrid ItemsSource="{Binding Source=DownloadResults}" AutoGenerateColumns="False" Name="InfoDataGrid" Margin="0,130,0,-130">
+        <DataGrid ItemsSource="{Binding DownloadResults}" AutoGenerateColumns="False" Name="InfoDataGrid" Margin="0,130,0,-130">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Url" Binding="{Binding Url}"/>
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>
