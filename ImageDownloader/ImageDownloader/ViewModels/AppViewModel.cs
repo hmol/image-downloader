@@ -49,6 +49,9 @@ namespace ImageDownloader.ViewModels
         ObservableAsPropertyHelper<Visibility> _SpinnerVisibility;
         public Visibility SpinnerVisibility => _SpinnerVisibility.Value;
 
+        IObservable<bool> _ButtonEnabled;
+        public IObservable<bool> ButtonEnabled => _ButtonEnabled;
+
         public AppViewModel()
         {
             ExecuteDownload = ReactiveCommand.CreateAsyncTask(parameter => GetDownloadResults(this.SourceUrl, this.DestinationPath));
@@ -59,6 +62,8 @@ namespace ImageDownloader.ViewModels
             _SpinnerVisibility = ExecuteDownload.IsExecuting
                 .Select(x => x ? Visibility.Visible : Visibility.Collapsed)
                 .ToProperty(this, x => x.SpinnerVisibility, Visibility.Hidden);
+
+            _ButtonEnabled = ExecuteDownload.IsExecuting.Select(x => !x);
         }
 
         public static async Task<List<DownloadResult>> GetDownloadResults(string sourceUrl, string destinationPath)
@@ -102,6 +107,7 @@ namespace ImageDownloader.ViewModels
                 }
                 var downloadResult = new DownloadResult() { Status = status, Url = imgSrc };
                 downloadList.Add(downloadResult);
+
             }
             return downloadList;
         }
