@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -64,10 +63,10 @@ namespace ImageDownloader.ViewModels
 
         public static async Task<List<DownloadResult>> GetDownloadResults(string sourceUrl, string destinationPath)
         {
+
+
             if (!IsValid(sourceUrl, destinationPath))
                 return null;
-
-            await Task.Run(() => Thread.Sleep(10000));
 
             var client = new RestClient(sourceUrl);
             var request = new RestRequest();
