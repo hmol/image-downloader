@@ -19,10 +19,7 @@ namespace ImageDownloader.ViewModels
         public string DestinationPath { get; set; }
         public string SourceUrl { get; set; }
 
-        // We will describe this later, but ReactiveCommand is a Command
-        // (like "Open", "Copy", "Delete", etc), that manages a task running
-        // in the background.
-
+        //A Command managing a task running in the background.
         public ReactiveCommand<List<DownloadResult>> ExecuteDownload { get; protected set; }
 
         /* ObservableAsPropertyHelper
