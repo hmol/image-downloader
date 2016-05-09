@@ -26,9 +26,6 @@ namespace ImageDownloader.ViewModels
 
         public ReactiveCommand<List<DownloadResult>> ExecuteDownload { get; protected set; }
 
-
-        public ReactiveCommand<string> StartAsyncCommand { get; protected set; }
-
         /* ObservableAsPropertyHelper
          * 
          * Here's the interesting part: In ReactiveUI, we can take IObservables
@@ -56,40 +53,21 @@ namespace ImageDownloader.ViewModels
         public AppViewModel()
         {
             ExecuteDownload = ReactiveCommand.CreateAsyncTask(parameter => GetDownloadResults(this.SourceUrl, this.DestinationPath));
+            ExecuteDownload.ThrownExceptions.Subscribe(ex => {/* Handle errors here */});
 
-            StartAsyncCommand = ReactiveCommand.CreateAsyncTask<string>(_ =>
-            {
-                return Task.Run(() =>
-                {
-                    int Progress = 0;
-                    while (Progress <= 100)
-                    {
-                        Progress += 10;
-                        Thread.Sleep(100);
-                    }
-
-                    return "sdf";
-                });
-            });
-
+            _DownloadResults = ExecuteDownload.ToProperty(this, x => x.DownloadResults, new List<DownloadResult>());
 
             _SpinnerVisibility = ExecuteDownload.IsExecuting
                 .Select(x => x ? Visibility.Visible : Visibility.Collapsed)
                 .ToProperty(this, x => x.SpinnerVisibility, Visibility.Hidden);
-
-            ExecuteDownload.ThrownExceptions.Subscribe(ex => {/* Handle errors here */});
-
-
-
-            _DownloadResults = ExecuteDownload.ToProperty(this, x => x.DownloadResults, new List<DownloadResult>());
         }
-
-
 
         public static async Task<List<DownloadResult>> GetDownloadResults(string sourceUrl, string destinationPath)
         {
             if (!IsValid(sourceUrl, destinationPath))
                 return null;
+
+            await Task.Run(() => Thread.Sleep(10000));
 
             var client = new RestClient(sourceUrl);
             var request = new RestRequest();
@@ -118,8 +96,6 @@ namespace ImageDownloader.ViewModels
                     {
                         webClient.DownloadFile(imgSrc, localFilename);
                     }
-
-
                 }
                 catch (Exception ex)
                 {
