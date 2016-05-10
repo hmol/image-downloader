@@ -112,7 +112,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\DownloadResult.cs" />
-    <Compile Include="Utils\Extensions\ObjectExtensions.cs" />
+    <Compile Include="Utils\Helpers\DownloadHelper.cs" />
     <Compile Include="ViewModels\AppViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
