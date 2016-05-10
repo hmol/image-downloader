@@ -24,43 +24,56 @@ namespace ImageDownloader.Utils.Helpers
             if (!IsValid(sourceUrl, destinationPath))
                 return null;
 
-            var client = new RestClient(sourceUrl);
-            var request = new RestRequest();
-
-            var response = await Task.Run(() => client.Execute(request));
-            if (response == null)
-                return null;
+            var response = await ExecuteRequest(sourceUrl);
+            var imgSrcList = GetImageTagsSrc(response);
             var downloadList = new List<DownloadResult>();
-
-            var htmlDoc = new HtmlDocument();
-            htmlDoc.LoadHtml(response.Content);
-            var nodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
-            var imgSrcList = nodes.Select(x => x.GetAttributeValue("src", string.Empty).TrimEnd('/')).ToList();
 
             foreach (var imgSrc in imgSrcList)
             {
-                var name = Path.GetFileName(imgSrc);
-                var rgx = new Regex("[^a-zA-Z0-9 - .]");
-                var newName = rgx.Replace(name, "_");
-
-                var localFilename = string.Format("{0}\\{1}", destinationPath, newName);
-                var status = "Ok";
-                try
-                {
-                    using (var webClient = new WebClient())
-                    {
-                        webClient.DownloadFile(imgSrc, localFilename);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    status = ex.Message;
-                }
-                var downloadResult = new DownloadResult() { Status = status, Url = imgSrc };
+                var downloadResult = DownloadImageFile(imgSrc, destinationPath);
                 downloadList.Add(downloadResult);
-
             }
             return downloadList;
+        }
+
+        public async Task<IRestResponse> ExecuteRequest(string url)
+        {
+            var client = new RestClient(url);
+            var request = new RestRequest();
+
+            return await Task.Run(() => client.Execute(request));
+        }
+
+        public List<string> GetImageTagsSrc(IRestResponse restResponse)
+        {
+            var content = restResponse.Content;
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(content);
+            var nodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
+            var imgSrcList = nodes.Select(x => x.GetAttributeValue("src", string.Empty).TrimEnd('/')).ToList();
+            return imgSrcList;
+        }
+
+        public DownloadResult DownloadImageFile(string imgSrc, string destinationPath)
+        {
+            var name = Path.GetFileName(imgSrc);
+            var rgx = new Regex("[^a-zA-Z0-9 - .]");
+            var newName = rgx.Replace(name, "_");
+
+            var localFilename = string.Format("{0}\\{1}", destinationPath, newName);
+            var status = "Ok";
+            try
+            {
+                using (var webClient = new WebClient())
+                {
+                    webClient.DownloadFile(imgSrc, localFilename);
+                }
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+            return new DownloadResult() { Status = status, Url = imgSrc };
         }
 
         private static bool IsValid(string sourceUrl, string destinationPath)
