@@ -2,3 +2,5 @@
 
 For now it's just a toy-project for me to learn [reactive programming](http://www.reactivemanifesto.org/). For this I'm using [ReactiveUI](http://reactiveui.net/) and [Reactive Extensions](http://reactivex.io/)
 
+
+![Example run](http://henrikm.com/content/images/2016/May/nrk_download.gif)
