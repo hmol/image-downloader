@@ -49,19 +49,19 @@ namespace ImageDownloader.Utils.Helpers
             var content = restResponse.Content;
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(content);
-            var nodes = htmlDoc.DocumentNode.SelectNodes("//img[@src]");
-            var imgSrcList = nodes.Select(x => x.GetAttributeValue("src", string.Empty).TrimEnd('/')).ToList();
+            var nodes = htmlDoc.DocumentNode.SelectNodes(Constants.ImgSrcXpath);
+            var imgSrcList = nodes.Select(x => x.GetAttributeValue(Constants.ImgSrcAttribute, string.Empty).TrimEnd('/')).ToList();
             return imgSrcList;
         }
 
         public DownloadResult DownloadImageFile(string imgSrc, string destinationPath)
         {
             var name = Path.GetFileName(imgSrc);
-            var rgx = new Regex("[^a-zA-Z0-9 - .]");
+            var rgx = new Regex(Constants.FileNameRegex);
             var newName = rgx.Replace(name, "_");
 
-            var localFilename = string.Format("{0}\\{1}", destinationPath, newName);
-            var status = "Ok";
+            var localFilename = $"{destinationPath}\\{newName}";
+            var status = Constants.StatusOk;
             try
             {
                 using (var webClient = new WebClient())
